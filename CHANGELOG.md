@@ -1,3 +1,9 @@
+## 1.1.2 (Jan 3, 2019)
+
+BUG FIXES:
+
+* Compile statically linked binary to increase portability.
+
 ## 1.1.1 (Sep 21, 2018)
 
 IMPROVEMENTS:

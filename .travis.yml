@@ -17,7 +17,7 @@ cache:
   - vendor
 
 before_script:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install gpg2 pass; mkdir $GOPATH/bin; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install gpg2 pass; mkdir -p $GOPATH/bin; fi
 - gpg --batch --gen-key test-gpg-key
 - pass init "joe@foo.bar"
 - curl -L https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
@@ -28,10 +28,19 @@ script:
 - make testacc
 - make vet
 
+before_install:
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir -p $GOPATH/bin; fi
+- curl -L https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+- dep ensure
+
+install:
+- make build
+
 deploy:
   provider: releases
-  file_glob: true
-  file: $GOPATH/bin/*
+  file: 
+  - $TRAVIS_BUILD_DIR/builds/terraform-provider-pass-darwin_amd64.zip
+  - $TRAVIS_BUILD_DIR/builds/terraform-provider-pass-linux_amd64.zip
   skip_cleanup: true
   api_key:
     secure: FBkhoEOKe7mWDeQkMYmutvvPkQ8ijJP8nXGCkQVr1HE/SEBNd6A+NnY3q/vAiD6uEzGtKhFEgIEpQGkVatWEx+n5kgDGcASgpnR9WOJdlJB6xZTG++IpyRwEQgvZEbFLPw35CO0c8yuXPgSJIaDlHFeFFD7dsVoIzK9j0xy+uzFbSFcBRDFeeUFdGXv0DrFb9/fvjAycO2PYE1OJjpLykTwaxWaYCapjSRmBOsuCDHl29Jx9dq2b9umfWo08nJADnvQedKpdf9JVHWUffHDreqC4lh/DOcyLEfV4iB1J0l4LMVTR9NXex9/a8YhGp7aa0EA2ajUMVA6ZtXHDKhI/yqMFOjfkFYKD3rdnCipeLuM6zDgs4prrWv215VddPdHHj52TpQLqXssF5PaFjADDcgmjgp1EUvFwv0EBbuL7G8Abv7Zo/VVOxWfug5GghmuGVqAOqwichAVd909CigCkilpXaXRSC6bP9QJrKj8mS+/fij75A1uwhcxcGfBsF2mjikYB13RGo+af++BiccmZy5ybzLhSpcswrWjsUBpl8twDgQIeqDGNXUrWO4+ciu4T9JlqCR0L1RlKcjq4pg97EOArYhkQ7TfJvCqOkeYxSFYbxbFiS6Lw9CxuWSfZIeWAFdytOUg77MjYFZOETPSMv8qg2yi0+gk1+poGLp9pElc=

@@ -1,0 +1,40 @@
+language: go
+go:
+- '1.10'
+
+os:
+- linux
+- osx
+
+addons:
+  apt:
+    packages:
+    - gnupg2
+    - pass
+
+cache:
+  directories:
+  - vendor
+
+before_script:
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install gpg2 pass; mkdir $GOPATH/bin; fi
+- gpg --batch --gen-key test-gpg-key
+- pass init "joe@foo.bar"
+- curl -L https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+- dep ensure
+
+script:
+- make test
+- make testacc
+- make vet
+
+deploy:
+  provider: releases
+  file_glob: true
+  file: $GOPATH/bin/*
+  skip_cleanup: true
+  api_key:
+    secure: FBkhoEOKe7mWDeQkMYmutvvPkQ8ijJP8nXGCkQVr1HE/SEBNd6A+NnY3q/vAiD6uEzGtKhFEgIEpQGkVatWEx+n5kgDGcASgpnR9WOJdlJB6xZTG++IpyRwEQgvZEbFLPw35CO0c8yuXPgSJIaDlHFeFFD7dsVoIzK9j0xy+uzFbSFcBRDFeeUFdGXv0DrFb9/fvjAycO2PYE1OJjpLykTwaxWaYCapjSRmBOsuCDHl29Jx9dq2b9umfWo08nJADnvQedKpdf9JVHWUffHDreqC4lh/DOcyLEfV4iB1J0l4LMVTR9NXex9/a8YhGp7aa0EA2ajUMVA6ZtXHDKhI/yqMFOjfkFYKD3rdnCipeLuM6zDgs4prrWv215VddPdHHj52TpQLqXssF5PaFjADDcgmjgp1EUvFwv0EBbuL7G8Abv7Zo/VVOxWfug5GghmuGVqAOqwichAVd909CigCkilpXaXRSC6bP9QJrKj8mS+/fij75A1uwhcxcGfBsF2mjikYB13RGo+af++BiccmZy5ybzLhSpcswrWjsUBpl8twDgQIeqDGNXUrWO4+ciu4T9JlqCR0L1RlKcjq4pg97EOArYhkQ7TfJvCqOkeYxSFYbxbFiS6Lw9CxuWSfZIeWAFdytOUg77MjYFZOETPSMv8qg2yi0+gk1+poGLp9pElc=
+  on:
+    repo: rafaelfelix/terraform-provider-pass
+    tags: true

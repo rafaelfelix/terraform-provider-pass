@@ -4,11 +4,12 @@ GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 default: build
 
 build: fmtcheck
-	CGO_ENABLED=0 go install
+	go install
 	@zip -j builds/terraform-provider-pass-$$(go env GOOS)_$$(go env GOARCH).zip $$(go env GOPATH)/bin/terraform-provider-pass
 
 static-build: fmtcheck
 	CGO_ENABLED=0 go install
+	@zip -j builds/terraform-provider-pass-static-$$(go env GOOS)_$$(go env GOARCH).zip $$(go env GOPATH)/bin/terraform-provider-pass
 
 test: fmtcheck
 	go test -i $(TEST) || exit 1

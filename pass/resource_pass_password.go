@@ -9,7 +9,7 @@ import (
 
 	"github.com/gopasspw/gopass/pkg/store/root"
 	"github.com/gopasspw/gopass/pkg/store/secret"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/pkg/errors"
 )
 
@@ -21,23 +21,25 @@ func passPasswordResource() *schema.Resource {
 		Read:   passPasswordResourceRead,
 
 		Schema: map[string]*schema.Schema{
-			"path": &schema.Schema{
+			"path": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 				Description: "Full path where the pass data will be written.",
 			},
 
-			"password": &schema.Schema{
+			"password": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "secret password.",
+				Sensitive:   true,
 			},
 
-			"data": &schema.Schema{
+			"data": {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				Description: "additional secret data.",
+				Sensitive:   true,
 			},
 		},
 	}
@@ -92,7 +94,7 @@ func passPasswordResourceRead(d *schema.ResourceData, meta interface{}) error {
 	st := meta.(*root.Store)
 	sec, err := st.Get(context.Background(), path)
 	if err != nil {
-		errors.Wrapf(err, "failed to retrieve password at %s", path)
+		return errors.Wrapf(err, "failed to retrieve password at %s", path)
 	}
 
 	d.Set("password", sec.Password())

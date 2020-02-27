@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	r "github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	r "github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestResourcePassword(t *testing.T) {
@@ -13,11 +13,11 @@ func TestResourcePassword(t *testing.T) {
 		Providers: testProviders,
 		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []r.TestStep{
-			r.TestStep{
+			{
 				Config: testResourcePassword_initialConfig,
 				Check:  testResourcePassword_initialCheck,
 			},
-			r.TestStep{
+			{
 				Config: testResourcePassword_updateConfig,
 				Check:  testResourcePassword_updateCheck,
 			},

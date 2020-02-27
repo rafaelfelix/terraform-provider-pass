@@ -1,3 +1,17 @@
+## 1.2.1 (June 05, 2019)
+
+ENHANCEMENTS:
+
+* Use Terraform v0.12.0
+
+## 1.2.0 (May 21, 2019)
+
+IMPROVEMENTS:
+
+* Update Gopass dependencies
+* Use Terraform v0.12-beta's API
+* Improve build config, add CI
+
 ## 1.1.2 (Jan 3, 2019)
 
 BUG FIXES:

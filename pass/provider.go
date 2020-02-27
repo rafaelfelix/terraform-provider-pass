@@ -2,27 +2,29 @@ package pass
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/blang/semver"
 	"github.com/gopasspw/gopass/pkg/action"
+	_ "github.com/gopasspw/gopass/pkg/backend/storage"
 	"github.com/gopasspw/gopass/pkg/config"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/pkg/errors"
 )
 
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"store_dir": &schema.Schema{
+			"store_dir": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("PASSWORD_STORE_DIR", ""),
 				Description: "Password storage directory to use.",
 			},
-			"refresh_store": &schema.Schema{
+			"refresh_store": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
@@ -52,8 +54,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, errors.Wrap(err, "error instantiating password store")
 	}
 
-	if !act.Store.Initialized(ctx) {
-		return nil, errors.New("password-store not initialized")
+	if ok, err := act.Store.Initialized(ctx); !ok || err != nil {
+		return nil, errors.New(fmt.Sprintf("password-store not initialized: %s", err))
 	}
 	st := act.Store
 

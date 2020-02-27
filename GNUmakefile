@@ -1,9 +1,15 @@
-TEST?=$$(go list ./... |grep -v 'vendor')
+TEST?=./...
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
+PKG_NAME=pass
 
-default: build
+BINARY=terraform-provider-pass
+VERSION = $(shell git describe --always)
 
-build: fmtcheck
+default: build-all
+
+build-all: static-build linux windows darwin
+
+install: fmtcheck
 	go install
 	@zip -j builds/terraform-provider-pass-$$(go env GOOS)_$$(go env GOARCH).zip $$(go env GOPATH)/bin/terraform-provider-pass
 
@@ -11,42 +17,58 @@ static-build: fmtcheck
 	CGO_ENABLED=0 go install
 	@zip -j builds/terraform-provider-pass-static-$$(go env GOOS)_$$(go env GOARCH).zip $$(go env GOPATH)/bin/terraform-provider-pass
 
+linux: fmtcheck
+	@mkdir -p bin/
+	GOOS=linux GOARCH=amd64 go build -v -o bin/$(BINARY)_$(VERSION)_linux_amd64
+	GOOS=linux GOARCH=386 go build -v -o bin/$(BINARY)_$(VERSION)_linux_x86
+
+windows: fmtcheck
+	@mkdir -p bin/
+	GOOS=windows GOARCH=amd64 go build -v -o bin/$(BINARY)_$(VERSION)_windows_amd64
+	GOOS=windows GOARCH=386 go build -v -o bin/$(BINARY)_$(VERSION)_windows_x86
+
+darwin: fmtcheck
+	@mkdir -p bin/
+	GOOS=darwin GOARCH=amd64 go build -v -o bin/$(BINARY)_$(VERSION)_darwin_amd64
+	GOOS=darwin GOARCH=386 go build -v -o bin/$(BINARY)_$(VERSION)_darwin_x86
+
+release: clean linux windows darwin
+	for f in $(shell ls bin/); do zip bin/$${f}.zip bin/$${f}; done
+
+clean:
+	git clean -fXd -e \!vendor -e \!vendor/**/*
+
 test: fmtcheck
-	go test -i $(TEST) || exit 1
-	echo $(TEST) | \
-		xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
+	go test $(TEST) -timeout=30s -parallel=4
 
 testacc: fmtcheck
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
-
-vet:
-	@echo "go vet ."
-	@go vet $$(go list ./... | grep -v vendor/) ; if [ $$? -eq 1 ]; then \
-		echo ""; \
-		echo "Vet found suspicious constructs. Please check the reported constructs"; \
-		echo "and fix them if necessary before submitting the code for review."; \
-		exit 1; \
-	fi
+	TF_ACC=1 go test $(TEST) -v -parallel 20 $(TESTARGS) -timeout 120m
 
 fmt:
-	gofmt -w $(GOFMT_FILES)
+	@echo "==> Fixing source code with gofmt..."
+	gofmt -s -w ./$(PKG_NAME)
 
+# Currently required by tf-deploy compile
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
 
-errcheck:
-	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
-
-vendor-status:
-	@govendor status
+lint:
+	@echo "==> Checking source code against linters..."
+	@GOGC=30 golangci-lint run ./$(PKG_NAME)
 
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
 		echo "ERROR: Set TEST to a specific package. For example,"; \
-		echo "  make test-compile TEST=./aws"; \
+		echo "  make test-compile TEST=./$(PKG_NAME)"; \
 		exit 1; \
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-.PHONY: build static-build test testacc vet fmt fmtcheck errcheck vendor-status test-compile
+vendor:
+	go mod tidy
+	go mod vendor
 
+vet:
+	go vet $<
+
+.PHONY: build test testacc fmt fmtcheck lint test-compile vendor

@@ -29,8 +29,6 @@ script:
 
 before_install:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir -p $GOPATH/bin; fi
-- curl -L https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-- dep ensure
 
 install:
 - make build

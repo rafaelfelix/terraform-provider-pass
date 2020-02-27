@@ -3,8 +3,8 @@ package main
 /* Bootstrap the plugin for Pass */
 
 import (
-	"github.com/rafaelfelix/terraform-provider-pass/pass"
 	"github.com/hashicorp/terraform-plugin-sdk/plugin"
+	"github.com/rafaelfelix/terraform-provider-pass/pass"
 )
 
 func main() {

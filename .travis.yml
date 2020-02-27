@@ -31,13 +31,16 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir -p $GOPATH/bin; fi
 
 install:
-- make build
+- make linux
+- make darwin
+- make windows
 
 deploy:
   provider: releases
   file: 
-  - $TRAVIS_BUILD_DIR/builds/terraform-provider-pass-darwin_amd64.zip
-  - $TRAVIS_BUILD_DIR/builds/terraform-provider-pass-linux_amd64.zip
+  - $TRAVIS_BUILD_DIR/bin/terraform-provider-pass_*_darwin_amd64
+  - $TRAVIS_BUILD_DIR/bin/terraform-provider-pass_*_linux_amd64
+  - $TRAVIS_BUILD_DIR/bin/terraform-provider-pass_*_windows_amd64
   skip_cleanup: true
   api_key:
     secure: ifyWGQPWNn48AkFKZxqMeNYnSoYVmivZZ+n1iOjbGAZiZdlN1lYKJw20jsTPr7TGqnkpGlrO0U+eScwSK0Ni94/OECOcya5o1KiG8q0+hJmORcHfIWb/0nqfQcQIc1KxQZF4gAS0GBDuxiFgWn6XtsEFzEVXKGqR/dZIynV2sMS11a++xpdN0wHmSCJtSaesaCgsqPT/WPjsS2lU2s9jrXUhZwL2HqTB+KaesoEdgKES9WNIKlY34q921L2+xqs9AidzINCRf/71Cpr5bCRZQNW8IQI8E3nw1UbBz30jEIFZ9SiQGBHuI5mu9/2EVHbbFCpxf3SDa7qQoESOIXIHq5QcgKAXiwZwq04eqkjFAiMGMADTQUh1LDWHtKGl5Vmo7lAHzYpY8QA5psdG66QoMG/dxnKJYTCRZ0ab2Je0RR4C997ZaEAWglpczqIPNyU7td+k/N2s9bILFzzEkOAH9hdX8jJpPGZzSL74PEHJGdqEB1UKawPdLeW6vL0JSQctF7AGAiH2lFjTMIeX1MUy0n+qOQ52V5mcC/jUo8XlK9DH9at1RnS1WsTS1D85MU7NJYvS+9WAa0aoPG2outZlnIcLQZgEbX1ZNWncKSMx1DPPZI4IN+L5D+R29rHCFkCH+e4EzUAGBoGbRlP9YtCWsMm9e7EJjRQeyWB+I9fSsc8=

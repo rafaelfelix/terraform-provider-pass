@@ -1,4 +1,4 @@
-module github.com/camptocamp/terraform-provider-pass
+module github.com/rafaelfelix/terraform-provider-pass
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3 // indirect
